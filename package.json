@@ -1,0 +1,14 @@
+{
+  "name": "ntt-rate-checker",
+  "version": "1.0.0",
+  "description": "Wormhole NTT Rate Limit Checker",
+  "scripts": {
+    "start": "serve -s . -l ${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
