@@ -644,12 +644,16 @@ function getStatus(remaining, capacity) {
         const cap = toBigInt(capacity);
         if (cap === 0n) return { text: 'UNLIMITED', class: 'status-ok', percent: 100 };
         
-        // Calculate percent using BigInt math, then convert result to Number
-        const percentBigInt = (rem * 100n) / cap;
-        let percent = Number(percentBigInt.toString());
+        // Use 10000x multiplier for 2 decimal precision, then divide by 100
+        // This prevents BigInt integer division from truncating small percentages to 0
+        const percentX100 = (rem * 10000n) / cap;
+        let percent = Number(percentX100) / 100; // e.g., 39 -> 0.39%
         
         // Cap at 100% (can happen if remaining > capacity due to refill)
         if (percent > 100) percent = 100;
+        
+        // Round to 2 decimal places for display
+        percent = Math.round(percent * 100) / 100;
         
         if (percent <= 5) return { text: 'CRITICAL', class: 'status-critical', percent };
         if (percent <= 30) return { text: 'LOW', class: 'status-low', percent };
