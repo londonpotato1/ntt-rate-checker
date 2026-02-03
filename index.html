@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTT Rate Limit Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            backdrop-filter: blur(10px);
+        }
+        .status-critical { color: #f85149; }
+        .status-low { color: #d29922; }
+        .status-ok { color: #3fb950; }
+        .glow-purple { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+        select, input {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+    </style>
+</head>
+<body class="text-gray-200 p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-purple-400 mb-2">⚡ NTT Rate Limit Checker</h1>
+            <p class="text-gray-400">Check Wormhole NTT transfer capacity in real-time</p>
+        </div>
+
+        <!-- Token Selection Card -->
+        <div class="card rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-white mb-4">🪙 Token Selection</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Preset Token</label>
+                    <select id="tokenPreset" class="w-full p-3 rounded-lg">
+                        <option value="">-- Select Token --</option>
+                        <optgroup label="🔥 Popular">
+                            <option value="W">W (Wormhole)</option>
+                            <option value="HYPE">HYPE (Hyperliquid)</option>
+                            <option value="AVAIL">AVAIL</option>
+                            <option value="Layer3">L3 (Layer3)</option>
+                        </optgroup>
+                        <optgroup label="💰 DeFi / Staking">
+                            <option value="osETH">osETH (StakeWise)</option>
+                            <option value="wstETH">wstETH (Lido)</option>
+                            <option value="ETHFI">ETHFI (EtherFi)</option>
+                            <option value="JitoSOL">JitoSOL</option>
+                            <option value="Renzo">REZ (Renzo)</option>
+                            <option value="VaultCraft">VCX (VaultCraft)</option>
+                        </optgroup>
+                        <optgroup label="💵 Stablecoins">
+                            <option value="USDS">USDS (Sky)</option>
+                            <option value="sUSD">sUSD (Synthetix)</option>
+                            <option value="ZeUSD">ZeUSD</option>
+                            <option value="mUSD">mUSD (Mezo)</option>
+                        </optgroup>
+                        <optgroup label="🎮 Gaming / Social">
+                            <option value="XBorg">XBG (XBorg)</option>
+                            <option value="Ponke">PONKE</option>
+                            <option value="Cheese">CHEESE</option>
+                            <option value="DOOD">DOOD (Doodles)</option>
+                        </optgroup>
+                        <optgroup label="🧬 DeSci / Bio">
+                            <option value="BioProtocol">BIO (BioProtocol)</option>
+                            <option value="VitaDAO">VITA (VitaDAO)</option>
+                            <option value="QBio">QBIO</option>
+                            <option value="ValleyDAO">GROW (ValleyDAO)</option>
+                        </optgroup>
+                        <optgroup label="🤖 AI / Data">
+                            <option value="GoPlus">GPS (GoPlus)</option>
+                            <option value="TracyAI">TRACY</option>
+                            <option value="RedStone">RED (RedStone)</option>
+                        </optgroup>
+                        <optgroup label="🔗 Infrastructure">
+                            <option value="WCT">WCT (WalletConnect)</option>
+                            <option value="Portal">PORTAL</option>
+                            <option value="IoTeX">IOTX (IoTeX)</option>
+                            <option value="Powerledger">POWR</option>
+                            <option value="SQD">SQD (Subsquid)</option>
+                        </optgroup>
+                        <optgroup label="🪙 Wrapped Native">
+                            <option value="wSOL">wSOL</option>
+                            <option value="wPOL">wPOL</option>
+                            <option value="AVAX">wAVAX</option>
+                        </optgroup>
+                        <optgroup label="₿ Hashkey / BTC">
+                            <option value="cgETH">cgETH (Hashkey)</option>
+                            <option value="clBTC">clBTC (Hashkey)</option>
+                        </optgroup>
+                        <optgroup label="🌍 Others">
+                            <option value="SPACE">SPACE (Spacecoin)</option>
+                            <option value="Swissborg">BORG (SwissBorg)</option>
+                            <option value="Agora">AGORA</option>
+                            <option value="WeatherXM">WXM</option>
+                            <option value="HoudiniSwap">LOCK</option>
+                            <option value="stAvail">stAVAIL</option>
+                            <option value="CreatorBid">BID</option>
+                            <option value="Lingo">LINGO</option>
+                            <option value="BrazilianDigital">BRZ</option>
+                            <option value="BXDN">BXDN</option>
+                            <option value="ROAM">ROAM</option>
+                            <option value="INFOFI">INFOFI</option>
+                            <option value="BALL">BALL</option>
+                            <option value="EDEN">EDEN</option>
+                            <option value="FASH">FASH</option>
+                            <option value="NEIRO">NEIRO</option>
+                            <option value="deJTRSY">deJTRSY</option>
+                            <option value="deJAAA">deJAAA</option>
+                            <option value="UIUI">UIUI</option>
+                            <option value="NEURON">NEURON</option>
+                        </optgroup>
+                        <optgroup label="⚙️ Custom">
+                            <option value="custom">Custom (Enter Address)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Target Chain</label>
+                    <select id="chainSelect" class="w-full p-3 rounded-lg">
+                        <option value="ethereum">Ethereum</option>
+                        <option value="arbitrum">Arbitrum</option>
+                        <option value="base">Base</option>
+                        <option value="optimism">Optimism</option>
+                        <option value="bsc">BSC (BNB Chain)</option>
+                        <option value="polygon">Polygon</option>
+                        <option value="avalanche">Avalanche</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Custom Address Input (hidden by default) -->
+            <div id="customAddressDiv" class="hidden mb-4">
+                <label class="block text-sm text-gray-400 mb-2">NTT Manager Address</label>
+                <input type="text" id="customAddress" placeholder="0x..." class="w-full p-3 rounded-lg font-mono text-sm">
+            </div>
+
+            <button id="checkBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all glow-purple">
+                🔍 Check Rate Limits
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingDiv" class="hidden card rounded-xl p-8 mb-6 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p class="text-gray-400">Fetching rate limit data...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsDiv" class="hidden">
+            <!-- Token Info -->
+            <div class="card rounded-xl p-6 mb-6">
+                <h2 class="text-2xl font-bold text-white mb-2">
+                    <span id="tokenSymbol">SPACE</span> on <span id="chainName">Ethereum</span>
+                </h2>
+                <p class="text-gray-400 text-sm font-mono" id="contractAddr"></p>
+            </div>
+
+            <!-- Outbound -->
+            <div class="card rounded-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-400 mb-4">📤 OUTBOUND (Sending from this chain)</h3>
+                <div class="text-center">
+                    <p class="text-gray-400 mb-1">Capacity:</p>
+                    <p id="outboundCapacity" class="text-3xl font-bold text-green-400">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Inbound Section -->
+            <div class="card rounded-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-cyan-400 mb-4">📥 INBOUND (Receiving to this chain)</h3>
+                <div id="inboundResults" class="space-y-4">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Rate Limit Info -->
+            <div class="card rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-300 mb-4">ℹ️ RATE LIMIT INFO</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Duration:</p>
+                        <p id="duration" class="text-white">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Refill Rate:</p>
+                        <p id="refillRate" class="text-white">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error -->
+        <div id="errorDiv" class="hidden card rounded-xl p-6 border-red-500/50">
+            <p class="text-red-400" id="errorMsg"></p>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>Built for 따리 traders 🥔 | Data from Wormhole NTT Contracts</p>
+        </div>
+    </div>
+
+    <script src="app.js?v=4"></script>
+</body>
+</html>
